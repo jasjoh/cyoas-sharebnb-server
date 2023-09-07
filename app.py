@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 from forms import PostListProperty
-from requests.exceptions import HTTPError
+from flask_cors import CORS
 import boto3
 
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'secret_key'
 app.config['WTF_CSRF_ENABLED'] = False
 
@@ -14,24 +15,31 @@ app.config['WTF_CSRF_ENABLED'] = False
 
 
 # Jesse's Config
-BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jes'
-REGION = 'us-east-2'
+# BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jes'
+# REGION = 'us-east-2'
 
 # Jason's Config
-# BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jas'
-# REGION = 'us-west-1'
+BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jas'
+REGION = 'us-west-1'
+
+@app.get("/properties")
+def get_lucky_num():
+    response = {'hello': 'hello'}
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return (jsonify(response), 200)
+
 
 @app.post("/properties")
-def get_lucky_num():
+def post_lucky_num():
     """
     """
     # print('request.json', request.json)
-    # print('request.form', request.form)
-    # print('request.args', request.args)
-    # print('request.files', request.files)
+    print('request.form', request.form)
+    print('request.args', request.args)
+    print('request.files', request.files)
     # generate form data for validation using JSON from request
     form_data = {
-        "image_file": request.files["image_file"],
+        "image_file": request.files["imageFile"],
         "description": request.form["description"],
         "title": request.form["title"],
         "price": request.form["price"],
