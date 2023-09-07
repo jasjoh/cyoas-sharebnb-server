@@ -1,33 +1,34 @@
+import os
+from dotenv import load_dotenv
+
 from flask import Flask, request, jsonify
-from forms import PostListProperty
+
+from forms import PostLogin, PostRegister, PatchUser
+from forms import PostCreateBooking, PostSendMessage, PostListProperty
+from models import db, connect_db, User, Property, Message, Booking, Photo
+
 from flask_cors import CORS
+
 import boto3
 
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-app.config['SECRET_KEY'] = 'secret_key'
+
+S3_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+AWS_REGION = os.environ['AWS_REGION']
+
+DEFAULT_IMAGE_URL = ( f'https://{S3_BUCKET_NAME}.s3.{AWS_REGION}'
+                     f'.amazonaws.com/craterhoof_4x6.jpg')
+
+app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+
+app.config['SQLALCHEMY_ECHO'] = True
 app.config['WTF_CSRF_ENABLED'] = False
 
-# Flask WTF File Forms
-# https://flask-wtf.readthedocs.io/en/0.15.x/form/#file-uploads
-
-
-
-# Jesse's Config
-BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jes'
-REGION = 'us-east-2'
-
-# Jason's Config
-# BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jas'
-# REGION = 'us-west-1'
-
-@app.get("/properties")
-def get_lucky_num():
-    response = {'hello': 'hello'}
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return (jsonify(response), 200)
-
+connect_db(app)
 
 @app.post("/properties")
 def post_lucky_num():
@@ -55,9 +56,9 @@ def post_lucky_num():
         print('f.filename', f.filename)
         # step 2: upload image to s3 and get URL
         s3 = boto3.resource('s3')
-        s3.Bucket(BUCKET_NAME).put_object(Key=f.filename, Body=f, ContentType=f.content_type)
+        s3.Bucket(S3_BUCKET_NAME).put_object(Key=f.filename, Body=f, ContentType=f.content_type)
 
-        url = f'https://{BUCKET_NAME}.s3.{REGION}.amazonaws.com/{f.filename}'
+        url = f'https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{f.filename}'
 
         response = {'url': url}
 

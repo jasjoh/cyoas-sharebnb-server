@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
-
 class User(db.Model):
     """User in the system."""
 
@@ -159,6 +158,11 @@ class Photo(db.Model):
     property = db.Column(
         db.Integer,
         db.ForeignKey('properties.id')
+    )
+
+    url = db.Column(
+        db.String,
+        nullable=False
     )
 
 
