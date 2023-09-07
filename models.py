@@ -9,6 +9,7 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
+    """User in the system."""
 
     __tablename__ = "users"
 
@@ -32,10 +33,71 @@ class User(db.Model):
         nullable=False
     )
 
+    properties = db.relationship(
+        'Property',
+        backref='host_username'
+    )
+
+    messages_sent = db.relationship(
+        'Message',
+        backref='sender'
+    )
+
+    messages_received = db.relationship(
+        'Message',
+        backref='recipient'
+    )
+
+    bookings = db.relationship(
+        'Bookings',
+        backref='booker'
+    )
+
     #class methods for signup and authenticate
 
+    @classmethod
+    def signup(cls, username, password, first_name, last_name):
+        """Sign up user.
 
-class Properties(db.Model):
+        Hashes password and adds user to session.
+        """
+
+        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+
+        user = User(
+            username=username,
+            password=hashed_pwd,
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        db.session.add(user)
+        return user
+
+    @classmethod
+    def authenticate(cls, username, password):
+        """Find user with `username` and `password`.
+
+        This is a class method (call it on the class, not an individual user.)
+        It searches for a user whose password hash matches this password
+        and, if it finds such a user, returns that user object.
+
+        If this can't find matching user (or if password is wrong), returns
+        False.
+        """
+
+        user = cls.query.filter_by(username=username).one_or_none()
+
+        if user:
+            is_auth = bcrypt.check_password_hash(user.password, password)
+            if is_auth:
+                return user
+
+        return False
+
+
+class Property(db.Model):
+    """A listed property."""
 
     __tablename__ = 'properties'
 
@@ -64,7 +126,23 @@ class Properties(db.Model):
         db.ForeignKey('users.username')
     )
 
-class Photos(db.Model):
+    photos = db.relationship(
+        'Photo',
+        backref='property'
+    )
+
+    messages = db.relationship(
+        'Message',
+        backref='property'
+    )
+
+    bookings = db.relationship(
+        'Booking',
+        backref='property'
+    )
+
+class Photo(db.Model):
+    """A photo of a property."""
 
     __tablename__ = 'photos'
 
@@ -84,7 +162,8 @@ class Photos(db.Model):
     )
 
 
-class Messages(db.Model):
+class Message(db.Model):
+    """A message sent between one user to another."""
 
     __tablename__ = 'messages'
 
@@ -120,7 +199,8 @@ class Messages(db.Model):
     )
 
 
-class Bookings(db.Model):
+class Booking(db.Model):
+    """A booking for a property."""
 
     __tablename__ = 'bookings'
 

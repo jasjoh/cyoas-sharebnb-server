@@ -15,12 +15,12 @@ app.config['WTF_CSRF_ENABLED'] = False
 
 
 # Jesse's Config
-# BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jes'
-# REGION = 'us-east-2'
+BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jes'
+REGION = 'us-east-2'
 
 # Jason's Config
-BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jas'
-REGION = 'us-west-1'
+# BUCKET_NAME = 'rithm-r32-jesjas-sharebnb-jas'
+# REGION = 'us-west-1'
 
 @app.get("/properties")
 def get_lucky_num():
