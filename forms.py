@@ -93,9 +93,12 @@ class PostSendMessage(FlaskForm):
 class PostListProperty(FlaskForm):
     """ Form for validating requests to list a new property """
 
-    image_file = FileField(
-        'Image file',
-        validators=[Optional()],
+    photo_primary_file = FileField(
+        'Photo File'
+    )
+
+    photo_primary_name = StringField(
+        'Photo Name'
     )
 
     description = StringField(
@@ -106,6 +109,6 @@ class PostListProperty(FlaskForm):
         'Title'
     )
 
-    price = IntegerField(
-        'Price'
+    price_per_day = IntegerField(
+        'Price Per Day'
     )

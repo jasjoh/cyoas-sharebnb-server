@@ -45,22 +45,29 @@ def add_user_to_g():
     """Grabs the auth header, and if a token exists, verifies, decodes, and
     assigns its payload to g.user.  ex:  {username, first_name, last_name} """
 
-    auth_header = request.headers.get('authorization')
-    print('add_user_to_g() called with auth_header', auth_header)
+    # auth_header = request.headers.get('authorization')
+    # print('add_user_to_g() called with auth_header', auth_header)
 
-    if auth_header == None:
-        g.user = None
+    # if auth_header == None:
+    #     g.user = None
 
-    else:
-        try:
-            token = auth_header.split(' ')[1]
-            user = verify_and_decode_jwt(token)
-            print("adding user to g", user)
-            g.user = user
+    # else:
+    #     try:
+    #         token = auth_header.split(' ')[1]
+    #         user = verify_and_decode_jwt(token)
+    #         print("adding user to g", user)
+    #         g.user = user
 
-        except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
-            print("attempting to decode tokens threw exception")
-            g.user = None
+    #     except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+    #         print("attempting to decode tokens threw exception")
+    #         g.user = None
+
+    # TODO: Hardcoded User
+    g.user = {
+        'username': 'username',
+        'first_name': 'First Name',
+        'last_name': 'Last Name'
+    }
 
 
 
@@ -138,8 +145,8 @@ def post_lucky_num():
     # generate form data for validation using JSON from request
 
     form_data = MultiDict([
-        ('primary_photo_file', request.files["primaryPhotoFile"]),
-        ('primary_photo_name', request.files["primaryPhotoName"]),
+        ('photo_primary_file', request.files["photoPrimaryFile"]),
+        ('photo_primary_name', request.files["photoPrimaryName"]),
         ('description', request.form["description"]),
         ('title', request.form["title"]),
         ('price_per_day', request.form["pricePerDay"]),
@@ -150,7 +157,7 @@ def post_lucky_num():
     if form.validate_on_submit():
         # if we make it here, form passes WTForms validation
         # step 1: fetch image from form
-        file = form.primary_photo_file.data
+        file = form.photo_primary_file.data
         url = upload_to_s3(file)
 
         property = Property(
@@ -163,7 +170,7 @@ def post_lucky_num():
         db.session.commit()
 
         photo = Photo(
-            name=form.primary_photo_name,
+            name=form.photo_primary_name,
             property_id=property.id,
             url=url
         )
