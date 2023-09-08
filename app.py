@@ -135,7 +135,7 @@ def signup():
 
 
 @app.post("/properties")
-def post_lucky_num():
+def post_properties():
     """
     """
     # print('request.json', request.json)
@@ -146,7 +146,7 @@ def post_lucky_num():
 
     form_data = MultiDict([
         ('photo_primary_file', request.files["photoPrimaryFile"]),
-        ('photo_primary_name', request.files["photoPrimaryName"]),
+        ('photo_primary_name', request.form["photoPrimaryName"]),
         ('description', request.form["description"]),
         ('title', request.form["title"]),
         ('price_per_day', request.form["pricePerDay"]),
@@ -164,27 +164,29 @@ def post_lucky_num():
             title=form.title.data,
             description=form.description.data,
             price_per_day_cents=int(form.price_per_day.data) * 100,
-            host_username=g.user.username,
+            host_username=g.user['username'],
         )
         db.session.add(property)
         db.session.commit()
 
         photo = Photo(
-            name=form.photo_primary_name,
+            name=form.photo_primary_name.data,
             property_id=property.id,
             url=url
         )
         db.session.add(photo)
         db.session.commit()
 
+        breakpoint()
+
         response = {
-            property:  {
+            'property':  {
                 'id': property.id,
                 'description': property.description,
                 'price_per_day': property.price_per_day_cents * 100,
                 'host': property.host_username,
-                'photoPrimaryName': property.primary_photo.name,
-                'photoPrimaryUrl': property.primary_photo.url,
+                'photoPrimaryName': property.photo_primary[0].name,
+                'photoPrimaryUrl': property.photo_primary[0].url,
             }
         }
 
