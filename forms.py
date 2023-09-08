@@ -31,15 +31,15 @@ class PostRegister(FlaskForm):
         validators=[InputRequired(), Length(min=6, max=50)],
     )
 
-    # firstname = StringField(
-    #     'FirstName',
-    #     validators=[InputRequired()],
-    # )
+    first_name = StringField(
+        'FirstName',
+        validators=[InputRequired()],
+    )
 
-    # lastname = StringField(
-    #     'LastName',
-    #     validators=[InputRequired()],
-    # )
+    last_name = StringField(
+        'LastName',
+        validators=[InputRequired()],
+    )
 
 class PatchUser(FlaskForm):
     """ Form for validating requests to update a user profile """

@@ -11,6 +11,8 @@ from sqlalchemy.exc import IntegrityError
 import jwt
 from auth import encode_jwt, verify_and_decode_jwt
 
+from werkzeug.datastructures import MultiDict
+
 
 from flask_cors import CORS
 
@@ -74,17 +76,19 @@ def signup():
     """
 
 
-    form_data = {
+    form_data_dict = {
         "username": request.json["username"],
         "password": request.json["password"],
+        "first_name": request.json["firstName"],
+        "last_name": request.json["lastName"],
     }
 
-    print("form data to be injected into form:", form_data)
+    form_data_list = [(k, v) for k, v in form_data_dict.items()]
+    form_data_multi_dict = MultiDict(form_data_list)
 
-    form = PostRegister(obj=form_data, csrf_enabled=False)
+    print("form data to be injected into form:", form_data_multi_dict)
 
-    print("form username:", form.username.data)
-    print("form password:", form.password.data)
+    form = PostRegister(formdata=form_data_multi_dict, csrf_enabled=False)
 
     if form.validate():
         # all form data was valid
@@ -92,6 +96,8 @@ def signup():
             user = User.signup(
                 username=form.username.data,
                 password=form.password.data,
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
             )
             print("user should be good")
             db.session.commit()
@@ -104,6 +110,8 @@ def signup():
 
         token = encode_jwt(
             username=user.username,
+            first_name=user.first_name,
+            last_name=user.last_name,
         )
         print("token returned from signup()", token)
 

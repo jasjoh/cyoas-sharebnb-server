@@ -23,20 +23,30 @@ class User(db.Model):
         nullable=False
     )
 
-    # properties = db.relationship(
-    #     'Property',
-    #     backref='host'
-    # )
+    first_name = db.Column(
+        db.Text,
+        nullable=False
+    )
 
-    # bookings = db.relationship(
-    #     'Booking',
-    #     backref='booker'
-    # )
+    last_name = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    properties = db.relationship(
+        'Property',
+        backref='host'
+    )
+
+    bookings = db.relationship(
+        'Booking',
+        backref='booker'
+    )
 
     #class methods for signup and authenticate
 
     @classmethod
-    def signup(cls, username, password):
+    def signup(cls, username, password, first_name, last_name):
         """Sign up user.
 
         Hashes password and adds user to session.
@@ -46,7 +56,9 @@ class User(db.Model):
 
         user = User(
             username=username,
-            password=hashed_pwd
+            password=hashed_pwd,
+            first_name=first_name,
+            last_name=last_name,
         )
 
         db.session.add(user)
