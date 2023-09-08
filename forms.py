@@ -18,6 +18,9 @@ class PostLogin(FlaskForm):
 class PostRegister(FlaskForm):
     """ Form for validating new user registration requests """
 
+    class Meta:
+        csrf = False
+
     username = StringField(
         'Username',
         validators=[InputRequired()],
@@ -28,15 +31,15 @@ class PostRegister(FlaskForm):
         validators=[InputRequired(), Length(min=6, max=50)],
     )
 
-    first_name = StringField(
-        'First Name',
-        validators=[InputRequired()],
-    )
+    # firstname = StringField(
+    #     'FirstName',
+    #     validators=[InputRequired()],
+    # )
 
-    last_name = StringField(
-        'Last Name',
-        validators=[InputRequired()],
-    )
+    # lastname = StringField(
+    #     'LastName',
+    #     validators=[InputRequired()],
+    # )
 
 class PatchUser(FlaskForm):
     """ Form for validating requests to update a user profile """

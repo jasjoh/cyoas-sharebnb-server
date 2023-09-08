@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, g, session
 
 from forms import PostLogin, PostRegister, PatchUser
 from forms import PostCreateBooking, PostSendMessage, PostListProperty
+
 from models import db, connect_db, User, Property, Message, Booking, Photo
 from sqlalchemy.exc import IntegrityError
 import jwt
@@ -36,6 +37,91 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['WTF_CSRF_ENABLED'] = False
 
 connect_db(app)
+
+@app.before_request
+def add_user_to_g():
+    """Grabs the auth header, and if a token exists, verifies, decodes, and
+    assigns its payload to g.user.  ex:  {username, first_name, last_name} """
+
+    auth_header = request.headers.get('authorization')
+    print('add_user_to_g() called with auth_header', auth_header)
+
+    if auth_header == None:
+        g.user = None
+
+    else:
+        try:
+            token = auth_header.split(' ')[1]
+            user = verify_and_decode_jwt(token)
+            print("adding user to g", user)
+            g.user = user
+
+        except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+            print("attempting to decode tokens threw exception")
+            g.user = None
+
+
+
+@app.route('/auth/register', methods=["POST"])
+def signup():
+    """Handle user signup.
+
+    Create new user, add to DB and return token.
+
+    If form is invalid, return invalid request (ideally with invalid fields)
+
+    If the there already is a user with that username, return appropriate error
+    """
+
+
+    form_data = {
+        "username": request.json["username"],
+        "password": request.json["password"],
+    }
+
+    print("form data to be injected into form:", form_data)
+
+    form = PostRegister(obj=form_data, csrf_enabled=False)
+
+    print("form username:", form.username.data)
+    print("form password:", form.password.data)
+
+    if form.validate():
+        # all form data was valid
+        try:
+            user = User.signup(
+                username=form.username.data,
+                password=form.password.data,
+            )
+            print("user should be good")
+            db.session.commit()
+
+        except IntegrityError as exc:
+            # username already existed in database
+            print("integrity error:", exc)
+            print("signup() called but username already in database")
+            return (jsonify({"errors": [ "Username already taken" ]}), 400)
+
+        token = encode_jwt(
+            username=user.username,
+        )
+        print("token returned from signup()", token)
+
+        token_dict = { 'token': token }
+
+        return jsonify(token_dict, 201)
+
+    else:
+        # form.field = [ fields ]
+        # field.errors = [ error message ]
+        for field, errorMsgs in form.errors.items():
+            for err in errorMsgs:
+                print("form field with errors:", field)
+                print("error message:", err)
+
+        return (jsonify({"errors": [ "To be figured out" ]}), 400)
+
+
 
 @app.post("/properties")
 def post_lucky_num():
@@ -72,67 +158,3 @@ def post_lucky_num():
         return (jsonify(response), 201)
 
     return (jsonify({'Errors': 'An error occured'}), 400)
-
-
-@app.before_request
-def add_user_to_g():
-    """Grabs the auth header, and if a token exists, verifies, decodes, and
-    assigns its payload to g.user.  ex:  {username, first_name, last_name} """
-
-    auth_header = request.headers.get('authorization')
-    print('auth_header', auth_header)
-
-    if auth_header == None:
-        g.user = None
-
-    else:
-        try:
-            token = auth_header.split(' ')[1]
-            user = verify_and_decode_jwt(token)
-            g.user = user
-
-        except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
-            g.user = None
-
-
-
-@app.route('/auth/signup', methods=["POST"])
-def signup():
-    """Handle user signup.
-
-    Create new user and add to DB. Redirect to home page.
-
-    If form not valid, present form.
-
-    If the there already is a user with that username: flash message
-    and re-present form.
-    """
-
-
-    form_data = {
-        "username": request.json["username"],
-        "password": request.json["description"],
-        "first_name": request.json["firstName"],
-        "last_name": request.json["lastName"],
-    }
-
-    form = PostRegister(data=form_data, csrf_enabled=False)
-
-    if form.validate_on_submit():
-        try:
-            user = User.signup(
-                username=form.username.data,
-                password=form.password.data,
-                first_name=form.first_name.data,
-                last_name=form.last_name.data
-            )
-
-            db.session.commit()
-
-        except IntegrityError:
-            return (jsonify({"errors": [ "Username already taken" ]}), 400)
-
-
-        return jsonify()
-
-    else:

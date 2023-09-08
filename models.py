@@ -23,40 +23,20 @@ class User(db.Model):
         nullable=False
     )
 
-    first_name = db.Column(
-        db.Text,
-        nullable=False
-    )
+    # properties = db.relationship(
+    #     'Property',
+    #     backref='host'
+    # )
 
-    last_name = db.Column(
-        db.Text,
-        nullable=False
-    )
-
-    properties = db.relationship(
-        'Property',
-        backref='host_username'
-    )
-
-    messages_sent = db.relationship(
-        'Message',
-        backref='sender'
-    )
-
-    messages_received = db.relationship(
-        'Message',
-        backref='recipient'
-    )
-
-    bookings = db.relationship(
-        'Bookings',
-        backref='booker'
-    )
+    # bookings = db.relationship(
+    #     'Booking',
+    #     backref='booker'
+    # )
 
     #class methods for signup and authenticate
 
     @classmethod
-    def signup(cls, username, password, first_name, last_name):
+    def signup(cls, username, password):
         """Sign up user.
 
         Hashes password and adds user to session.
@@ -66,9 +46,7 @@ class User(db.Model):
 
         user = User(
             username=username,
-            password=hashed_pwd,
-            first_name=first_name,
-            last_name=last_name,
+            password=hashed_pwd
         )
 
         db.session.add(user)
@@ -156,7 +134,7 @@ class Photo(db.Model):
         nullable=False
     )
 
-    property = db.Column(
+    property_id = db.Column(
         db.Integer,
         db.ForeignKey('properties.id')
     )
@@ -182,17 +160,17 @@ class Message(db.Model):
        nullable=False
     )
 
-    sender = db.Column(
+    sender_username = db.Column(
         db.Text,
         db.ForeignKey('users.username')
     )
 
-    recipient = db.Column(
+    recipient_username = db.Column(
         db.Text,
         db.ForeignKey('users.username')
     )
 
-    property = db.Column(
+    property_id = db.Column(
         db.Integer,
         db.ForeignKey('properties.id')
     )
@@ -201,6 +179,18 @@ class Message(db.Model):
         db.DateTime,
         nullable=False,
         default=datetime.utcnow,
+    )
+
+    sender = db.relationship(
+        'User',
+        foreign_keys=[sender_username],
+        backref='sent_messages'
+    )
+
+    recipient = db.relationship(
+        'User',
+        foreign_keys=[recipient_username],
+        backref='received_messages'
     )
 
 
@@ -224,12 +214,12 @@ class Booking(db.Model):
         nullable=False
     )
 
-    property = db.Column(
+    property_id = db.Column(
         db.Integer,
         db.ForeignKey('properties.id')
     )
 
-    booker = db.Column(
+    booker_username = db.Column(
         db.Text,
         db.ForeignKey('users.username')
     )
