@@ -13,3 +13,11 @@ db.session.add(like1)
 db.session.commit()
 
 """
+
+test_user = User.signup(
+        username='username',
+        password='password',
+        first_name='First Name',
+        last_name='Last Name'
+    )
+db.session.commit()
