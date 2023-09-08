@@ -182,8 +182,9 @@ def post_properties():
         response = {
             'property':  {
                 'id': property.id,
+                'title': property.title,
                 'description': property.description,
-                'price_per_day': property.price_per_day_cents * 100,
+                'pricePerDay': property.price_per_day_cents / 100,
                 'host': property.host_username,
                 'photoPrimaryName': property.photo_primary[0].name,
                 'photoPrimaryUrl': property.photo_primary[0].url,
@@ -200,14 +201,17 @@ def get_properties():
     properties = Property.query.all()
     propertiesResponse = [{
         'id': property.id,
+        'title': property.title,
         'description': property.description,
-        'price_per_day': property.price_per_day_cents * 100,
+        'pricePerDay': property.price_per_day_cents / 100,
         'host': property.host_username,
         'photoPrimaryName': property.photo_primary[0].name,
         'photoPrimaryUrl': property.photo_primary[0].url,
     } for property in properties]
+
     print("propertiesResponse after mapping:", propertiesResponse)
-    return (jsonify(propertiesResponse))
+
+    return (jsonify({ 'properties': propertiesResponse }))
 
 @app.delete('/properties/<int:id>')
 def delete_property(id):
