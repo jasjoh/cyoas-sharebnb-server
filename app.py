@@ -194,6 +194,28 @@ def post_properties():
 
     return (jsonify({'Errors': 'An error occured'}), 400)
 
+@app.get('/properties')
+def get_properties():
+    """ Endpoint to get all the properties """
+    properties = Property.query.all()
+    propertiesResponse = [{
+        'id': property.id,
+        'description': property.description,
+        'price_per_day': property.price_per_day_cents * 100,
+        'host': property.host_username,
+        'photoPrimaryName': property.photo_primary[0].name,
+        'photoPrimaryUrl': property.photo_primary[0].url,
+    } for property in properties]
+    print("propertiesResponse after mapping:", propertiesResponse)
+    return (jsonify(propertiesResponse))
+
+@app.delete('/properties/<int:id>')
+def delete_property(id):
+    property = Property.query.get_or_404(id)
+    db.session.delete(property)
+    db.session.commit()
+    return (jsonify({ 'message': 'Property Deleted'}))
+
 def upload_to_s3(file):
     """ Uploads a file to S3 and returns its URL """
     print('upload_to_s3() call with file', file)

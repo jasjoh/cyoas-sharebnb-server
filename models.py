@@ -131,6 +131,16 @@ class Property(db.Model):
         backref='property'
     )
 
+    def serialize(self):
+        """ Returns serialized dictionary of this instance """
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "price_per_day_cents": self.price_per_day_cents,
+            "host_username": self.host_username
+        }
+
 class Photo(db.Model):
     """A photo of a property."""
 
