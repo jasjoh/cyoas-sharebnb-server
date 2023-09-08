@@ -116,7 +116,7 @@ class Property(db.Model):
         db.ForeignKey('users.username')
     )
 
-    photos = db.relationship(
+    primary_photo = db.relationship(
         'Photo',
         backref='property'
     )
